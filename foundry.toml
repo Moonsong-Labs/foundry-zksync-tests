@@ -1,0 +1,22 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+fs_permissions = [
+    { access = "read-write", path = "zkout"},
+    { access = "read-write", path = "out"},
+]
+gas_limit = "18446744073709551615"
+[invariant]
+runs=10
+no_zksync_reserved_addresses=true
+
+[fuzz]
+runs=10
+no_zksync_reserved_addresses=true
+
+[profile.default.zksync]
+startup = true
+compile = true
+gas_limit = "18446744073709551615"
+zksolc = "1.5.7"

@@ -1,0 +1,2 @@
+zksync-contracts/=lib/zksync-contracts/
+@openzeppelin/=lib/openzeppelin-contracts/
