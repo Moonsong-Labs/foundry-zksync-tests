@@ -1,0 +1,40 @@
+name: zkSync Foundry Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check:
+    name: Foundry zkSync Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry from Matter Labs
+        run: |
+          # Get latest release info
+          RELEASE_DATA=$(curl -s https://api.github.com/repos/matter-labs/foundry-zksync/releases/latest)
+          DOWNLOAD_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | contains("foundry_nightly_linux_amd64.tar.gz")) | .browser_download_url')
+          
+          # Download and extract
+          curl -L "$DOWNLOAD_URL" | tar -xz
+          
+          # Install
+          ./foundry-zksync/install
+          source "$HOME/.bashrc"
+          
+          # Display version
+          forge --version
+
+      - name: Build
+        run: |
+          forge build --zksync
+        
+      - name: Run tests
+        run: |
+          forge test --zksync -vvv 
