@@ -15,24 +15,29 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
       - name: Install Foundry from Matter Labs
         run: |
-          # Download directly from Matter Labs CI artifacts
-          mkdir -p foundry-zksync
+          # Clone the repository (main branch)
+          git clone --depth 1 --branch main https://github.com/matter-labs/foundry-zksync.git
           cd foundry-zksync
           
-          # Download and install foundryup
-          curl -L https://raw.githubusercontent.com/matter-labs/foundry-zksync/main/foundryup/install > install
-          chmod +x install
-          ./install
+          # Build from source
+          cargo build --release
           
-          # Add foundry to PATH for this session
-          export PATH="$HOME/.foundry/bin:$PATH"
+          # Create foundry directory
+          mkdir -p $HOME/.foundry/bin
           
-          # Install specific version
-          foundryup --version nightly --repo matter-labs/foundry-zksync
+          # Copy binaries
+          cp target/release/forge $HOME/.foundry/bin/
+          cp target/release/cast $HOME/.foundry/bin/
+          cp target/release/anvil $HOME/.foundry/bin/
           
-          # Add to PATH for subsequent steps
+          # Add to PATH
           echo "$HOME/.foundry/bin" >> $GITHUB_PATH
           
           # Display version
