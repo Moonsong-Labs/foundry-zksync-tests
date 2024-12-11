@@ -16,28 +16,23 @@ jobs:
           submodules: recursive
 
       - name: Install Foundry from Matter Labs
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          # Get latest release info
-          echo "Getting latest release info..."
-          DOWNLOAD_URL=$(gh api repos/matter-labs/foundry-zksync/releases/latest | jq -r '.assets[] | select(.name | contains("foundry_nightly_linux_amd64.tar.gz")) | .browser_download_url')
-          
-          # Create directory and download
+          # Download directly from Matter Labs CI artifacts
           mkdir -p foundry-zksync
-          echo "Downloading foundry..."
-          gh release download --repo matter-labs/foundry-zksync --pattern '*linux_amd64.tar.gz' --dir .
+          cd foundry-zksync
           
-          # Extract
-          echo "Extracting..."
-          tar -xzf foundry_nightly_linux_amd64.tar.gz -C foundry-zksync
+          # Download and install foundryup
+          curl -L https://raw.githubusercontent.com/matter-labs/foundry-zksync/main/foundryup/install > install
+          chmod +x install
+          ./install
           
-          # Install
-          echo "Installing..."
-          chmod +x foundry-zksync/install
-          ./foundry-zksync/install
+          # Add foundry to PATH for this session
+          export PATH="$HOME/.foundry/bin:$PATH"
           
-          # Add to PATH
+          # Install specific version
+          foundryup --version nightly --repo matter-labs/foundry-zksync
+          
+          # Add to PATH for subsequent steps
           echo "$HOME/.foundry/bin" >> $GITHUB_PATH
           
           # Display version
