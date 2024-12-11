@@ -41,6 +41,13 @@ jobs:
           # Display version
           ./target/release/forge --version
 
+      - name: Install Dependencies
+        run: |
+          $FOUNDRY_BIN/forge install Moonsong-Labs/forge-zksync-std --no-commit
+          $FOUNDRY_BIN/forge install foundry-rs/forge-std --no-commit
+          $FOUNDRY_BIN/forge install cyfrin/zksync-contracts --no-commit
+          $FOUNDRY_BIN/forge install OpenZeppelin/openzeppelin-contracts --no-commit
+
       - name: Build
         run: |
           $FOUNDRY_BIN/forge build --zksync
