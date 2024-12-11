@@ -50,8 +50,8 @@ jobs:
 
       - name: Build
         run: |
-          $FOUNDRY_BIN/forge build --zksync
+          $FOUNDRY_BIN/forge build --via-ir --zksync
         
       - name: Run tests
         run: |
-          $FOUNDRY_BIN/forge test --zksync -vvv
+          $FOUNDRY_BIN/forge test --zksync --via-ir -vvv
