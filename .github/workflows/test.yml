@@ -35,24 +35,16 @@ jobs:
           # Build from source
           cargo build --release
           
-          # Create foundry directory
-          mkdir -p $HOME/.foundry/bin
-          
-          # Copy binaries
-          cp target/release/forge $HOME/.foundry/bin/
-          cp target/release/cast $HOME/.foundry/bin/
-          cp target/release/anvil $HOME/.foundry/bin/
-          
-          # Add to PATH
-          echo "$HOME/.foundry/bin" >> $GITHUB_PATH
+          # Store the path to foundry-zksync for later steps
+          echo "FOUNDRY_BIN=$(pwd)/target/release" >> $GITHUB_ENV
           
           # Display version
-          forge --version
+          ./target/release/forge --version
 
       - name: Build
         run: |
-          forge build --zksync
+          $FOUNDRY_BIN/forge build --zksync
         
       - name: Run tests
         run: |
-          forge test --zksync -vvv
+          $FOUNDRY_BIN/forge test --zksync -vvv
