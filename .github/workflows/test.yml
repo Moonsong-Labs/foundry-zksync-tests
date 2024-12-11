@@ -18,15 +18,24 @@ jobs:
       - name: Install Foundry from Matter Labs
         run: |
           # Get latest release info
-          RELEASE_DATA=$(curl -s https://api.github.com/repos/matter-labs/foundry-zksync/releases/latest)
-          DOWNLOAD_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | contains("foundry_nightly_linux_amd64.tar.gz")) | .browser_download_url')
+          RELEASE_URL="https://github.com/matter-labs/foundry-zksync/releases/latest/download/foundry_nightly_linux_amd64.tar.gz"
           
-          # Download and extract
-          curl -L "$DOWNLOAD_URL" | tar -xz
+          # Create directory and download
+          mkdir -p foundry-zksync
+          echo "Downloading from $RELEASE_URL..."
+          wget -q $RELEASE_URL -O foundry.tar.gz
+          
+          # Extract
+          echo "Extracting..."
+          tar -xzf foundry.tar.gz -C foundry-zksync
           
           # Install
+          echo "Installing..."
+          chmod +x foundry-zksync/install
           ./foundry-zksync/install
-          source "$HOME/.bashrc"
+          
+          # Add to PATH
+          echo "$HOME/.foundry/bin" >> $GITHUB_PATH
           
           # Display version
           forge --version
@@ -37,4 +46,4 @@ jobs:
         
       - name: Run tests
         run: |
-          forge test --zksync -vvv 
+          forge test --zksync -vvv
