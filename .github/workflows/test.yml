@@ -1,0 +1,57 @@
+name: zkSync Foundry Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  check:
+    name: Foundry zkSync Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install Foundry from Matter Labs
+        run: |
+          # Clone the repository (main branch)
+          git clone --depth 1 --branch main https://github.com/matter-labs/foundry-zksync.git
+          cd foundry-zksync
+          
+          # Build from source
+          cargo build --release
+          
+          # Store the path to foundry-zksync for later steps
+          echo "FOUNDRY_BIN=$(pwd)/target/release" >> $GITHUB_ENV
+          
+          # Display version
+          ./target/release/forge --version
+
+      - name: Install Dependencies
+        run: |
+          $FOUNDRY_BIN/forge install Moonsong-Labs/forge-zksync-std --no-commit
+          $FOUNDRY_BIN/forge install foundry-rs/forge-std --no-commit
+          $FOUNDRY_BIN/forge install cyfrin/zksync-contracts --no-commit
+          $FOUNDRY_BIN/forge install OpenZeppelin/openzeppelin-contracts --no-commit
+
+      - name: Build
+        run: |
+          $FOUNDRY_BIN/forge build --via-ir --zksync
+        
+      - name: Run tests
+        run: |
+          $FOUNDRY_BIN/forge test --zksync --via-ir -vvv
